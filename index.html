@@ -280,35 +280,120 @@
   </div>
   <script>
     const CONFIG = {
-      API_URL: 'https://chatnv-production.up.railway.app', // URL oficial do seu backend no Railway
+      API_URL: 'https://chatnv-production.up.railway.app',
       WHATSAPP_NUMBER: '5511986913505'
     };
+
     const chatBody = document.getElementById('chatBody');
     const chatForm = document.getElementById('chatForm');
     const chatInput = document.getElementById('chatInput');
     const getTime = () => new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    let messageHistory = [{ role: "system", content: "Qualificação Nova Vida TI." }, { role: "assistant", content: "Oi! 👋 Sou a Thais, da Nova Vida TI. Qual seu nome?" }];
+
+    let messageHistory = [
+      {
+        role: "system",
+        content: `Você é a Thais, da Nova Vida TI. Seu objetivo é pré-qualificar leads usando dados (crédito, cobrança e marketing). NUNCA faça mais de uma pergunta por vez.
+        Fluxo: 1. Nome 2. Dor 3. Volume [BOTOES_VOLUME] 4. Nome Empresa 5. CNPJ (Exatamente 14 dígitos).
+        Se qualificado, gere [WHATSAPP_DATA] com os campos Nome, Empresa, CNPJ, Base, Problema.
+        Se desqualificado, use [LEAD_DESQUALIFICADO].`
+      },
+      {
+        role: "assistant",
+        content: "Oi! 👋 Sou a Thais, da Nova Vida TI.<br><br>Trabalho ajudando empresas a melhorar resultados usando dados.<br><br>Antes de começar, nós NÃO somos banco e não oferecemos empréstimos.<br><br>Pra gente começar, qual seu nome?"
+      }
+    ];
+
     function addMessage(html, type = 'incoming') {
-      const row = document.createElement('div'); row.className = `nv-row ${type}`;
-      const bubble = document.createElement('div'); bubble.className = 'nv-bubble';
+      const row = document.createElement('div');
+      row.className = `nv-row ${type}`;
+      const bubble = document.createElement('div');
+      bubble.className = 'nv-bubble';
       bubble.innerHTML = html + `<span class="bubble-time">${getTime()}</span>`;
-      row.appendChild(bubble); chatBody.appendChild(row); chatBody.scrollTop = chatBody.scrollHeight;
+      row.appendChild(bubble);
+      chatBody.appendChild(row);
+      chatBody.scrollTop = chatBody.scrollHeight;
     }
+
+    function showTyping() {
+      const row = document.createElement('div');
+      row.className = 'nv-row incoming typing-indicator';
+      row.innerHTML = '<div class="nv-bubble"><div class="dot-typing"></div><div class="dot-typing"></div><div class="dot-typing"></div></div>';
+      chatBody.appendChild(row);
+      chatBody.scrollTop = chatBody.scrollHeight;
+      return row;
+    }
+
+    async function renderBotMessages(text) {
+      if (!text) return;
+      const chunks = text.split('<br><br>').filter(t => t.trim() !== '');
+      for (let chunk of chunks) {
+        const t = showTyping();
+        await new Promise(r => setTimeout(r, 1500));
+        t.remove();
+        addMessage(chunk.replace(/\n/g, '<br>'), 'incoming');
+      }
+    }
+
     async function processAIResponse() {
       try {
-        const response = await fetch(`${CONFIG.API_URL}/api/chat`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: messageHistory }) });
+        const response = await fetch(`${CONFIG.API_URL}/api/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: messageHistory })
+        });
         const data = await response.json();
         let botText = data.choices[0].message.content;
         messageHistory.push({ role: 'assistant', content: botText });
-        addMessage(botText.replace(/\n/g, '<br>'), 'incoming');
-      } catch (e) { addMessage("❌ Erro de conexão com o servidor.", "incoming"); }
+
+        if (botText.includes('[LEAD_DESQUALIFICADO]')) {
+          window.dataLayer?.push({ 'event': 'chat_lead_desqualificado' });
+        }
+
+        if (botText.includes('[WHATSAPP_DATA]')) {
+          window.dataLayer?.push({ 'event': 'chat_lead_qualificado' });
+          const match = botText.match(/\[WHATSAPP_DATA\]([\s\S]*?)\[\/WHATSAPP_DATA\]/);
+          if (match) {
+            const waLinkParams = match[1].trim();
+            botText = botText.replace(match[0], '');
+            setTimeout(() => {
+              const waLink = `https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(waLinkParams)}`;
+              addMessage(`<p>Vou te direcionar agora para um especialista.</p><a href="${waLink}" target="_blank" class="action-btn" onclick="window.dataLayer.push({'event': 'chat_whatsapp_click'})">Falar com Especialista</a>`, 'incoming');
+            }, 2000);
+          }
+        }
+
+        if (botText.includes('[BOTOES_VOLUME]')) {
+          const buttons = `<div class="chat-choice-container"><button class="chat-choice-btn" onclick="sendChoice('Até 10 mil contatos', this)">Até 10 mil contatos</button><button class="chat-choice-btn" onclick="sendChoice('Entre 50 mil e 100 mil', this)">Entre 50 mil e 100 mil</button><button class="chat-choice-btn" onclick="sendChoice('Acima de 100 mil', this)">Acima de 100 mil</button></div>`;
+          botText = botText.replace('[BOTOES_VOLUME]', buttons);
+        }
+
+        await renderBotMessages(botText.replace('[LEAD_DESQUALIFICADO]', ''));
+      } catch (e) {
+        addMessage("❌ Erro de conexão com o servidor. Verifique se o backend está online.", "incoming");
+      }
     }
+
+    function sendChoice(choice, btn) {
+      const parent = btn.parentElement;
+      parent.innerHTML = `<div class="chat-choice-selected">${choice}</div>`;
+      addMessage(choice, 'outgoing');
+      messageHistory.push({ role: 'user', content: choice });
+      processAIResponse();
+    }
+
     chatForm.addEventListener('submit', (e) => {
-      e.preventDefault(); const text = chatInput.value.trim(); if (!text) return;
-      chatInput.value = ''; addMessage(text, 'outgoing');
-      messageHistory.push({ role: 'user', content: text }); processAIResponse();
+      e.preventDefault();
+      const text = chatInput.value.trim();
+      if (!text) return;
+      chatInput.value = '';
+      addMessage(text, 'outgoing');
+      messageHistory.push({ role: 'user', content: text });
+      processAIResponse();
     });
-    window.onload = () => addMessage(messageHistory[1].content, 'incoming');
+
+    window.onload = () => {
+      renderBotMessages(messageHistory[1].content);
+    };
   </script>
 </body>
 
