@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Google Tag Manager -->
+  <script>(function (w, d, s, l, i) {
+      w[l] = w[l] || []; w[l].push({
+        'gtm.start':
+          new Date().getTime(), event: 'gtm.js'
+      }); var f = d.getElementsByTagName(s)[0],
+        j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+          'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+    })(window, document, 'script', 'dataLayer', 'GTM-PDMRZ5ZL');</script>
+  <!-- End Google Tag Manager -->
+  <title>Assistente Thais Souza - Nova Vida TI</title>
+  <link rel="icon" type="image/jpeg" href="https://i.ibb.co/hFc701tC/images.jpg" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+    :root {
+      --bg: #09090b;
+      --shell-bg: #0a0a0c;
+      --line: rgba(255, 255, 255, 0.03);
+      --text: #f3f4f6;
+      --muted: #8b929e;
+      --brand: #facc15;
+      --user-bubble: #facc15;
+      --bot-bubble: rgba(250, 204, 21, 0.04);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--bg);
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    #app-root {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+      width: 100vw;
+      background-color: var(--bg);
+    }
+
+    .chat-shell {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+      max-width: 900px;
+      background: var(--shell-bg);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 80px rgba(0, 0, 0, 0.5);
+    }
+
+    .chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 32px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .avatar-wrapper {
+      position: relative;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--brand);
+      border-radius: 50%;
+      position: absolute;
+      bottom: -1px;
+      right: -1px;
+      border: 2px solid var(--shell-bg);
+    }
+
+    .name-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .status {
+      color: var(--brand);
+      font-size: 12px;
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
+    .chat-body {
+      flex: 1;
+      padding: 30px 32px;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+
+    .date-pill {
+      margin: 0 auto 32px;
+      width: fit-content;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.4);
+      background: rgba(255, 255, 255, .02);
+      border-radius: 999px;
+      padding: 8px 18px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .privacy-pill {
+      margin: 0 auto 30px;
+      width: fit-content;
+      font-size: 12px;
+      color: var(--muted);
+      background: rgba(0, 0, 0, .4);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nv-row {
+      display: flex;
+      width: 100%;
+      margin-bottom: 24px;
+    }
+
+    .incoming {
+      justify-content: flex-start;
+    }
+
+    .outgoing {
+      justify-content: flex-end;
+    }
+
+    .nv-bubble {
+      max-width: 80%;
+      padding: 16px 20px;
+      border-radius: 16px;
+      line-height: 1.6;
+      font-size: 15px;
+      position: relative;
+      backdrop-filter: blur(10px);
+    }
+
+    .incoming .nv-bubble {
+      background: var(--bot-bubble);
+      border: 1px solid rgba(250, 204, 21, 0.1);
+      color: var(--text);
+      border-bottom-left-radius: 4px;
+    }
+
+    .outgoing .nv-bubble {
+      background: var(--user-bubble);
+      color: #000;
+      font-weight: 500;
+      border-bottom-right-radius: 4px;
+    }
+
+    .bubble-time {
+      display: block;
+      float: right;
+      margin-top: 8px;
+      margin-left: 12px;
+      font-size: 10px;
+      opacity: 0.5;
+    }
+
+    .outgoing .bubble-time {
+      color: rgba(0, 0, 0, 0.5);
+    }
+
+    .chat-footer {
+      padding: 24px 32px;
+      border-top: 1px solid var(--line);
+    }
+
+    .footer-form {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 30px;
+      padding: 8px 12px 8px 18px;
+      border: 1px solid var(--line);
+    }
+
+    .input-reset {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .send-btn {
+      background: var(--brand);
+      color: #000;
+      border: none;
+      height: 38px;
+      width: 38px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+
+    .send-btn:hover {
+      transform: scale(1.05);
+    }
+
+    .chat-choice-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      padding: 12px 16px;
+      margin-top: 8px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .chat-choice-btn:hover {
+      background: rgba(250, 204, 21, 0.15);
+      border-color: var(--brand);
+    }
+
+    .dot-typing {
+      width: 6px;
+      height: 6px;
+      background: var(--brand);
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 4px;
+      animation: bounce 1.4s infinite ease-in-out both;
+    }
+
+    .dot-typing:nth-child(2) {
+      animation-delay: -0.32s;
+    }
+
+    .dot-typing:nth-child(3) {
+      animation-delay: -0.16s;
+    }
+
+    @keyframes bounce {
+
+      0%,
+      80%,
+      100% {
+        transform: scale(0);
+        opacity: 0.3;
+      }
+
+      40% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .action-btn {
+      display: block;
+      width: 100%;
+      text-align: center;
+      background: var(--brand);
+      color: #000;
+      text-decoration: none;
+      padding: 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      margin-top: 16px;
+      transition: transform 0.2s;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 600px) {
+
+      .chat-header,
+      .chat-footer {
+        padding: 16px 20px;
+      }
+
+      .chat-body {
+        padding: 20px;
+      }
+
+      .nv-bubble {
+        max-width: 90%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PDMRZ5ZL" height="0" width="0"
+      style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+
+  <div id="app-root">
+    <main class="chat-shell">
+      <header class="chat-header">
+        <div class="profile">
+          <div class="avatar-wrapper">
+            <img src="https://i.ibb.co/1GrBp8Y4/Captura-de-tela-2026-04-09-152750.png" class="avatar"
+              alt="Thais Souza" />
+            <div class="status-dot"></div>
+          </div>
+          <div class="name-col">
+            <div class="name">Thais Souza - Nova Vida TI</div>
+            <div class="status">online</div>
+          </div>
+        </div>
+      </header>
+      <div class="chat-body" id="chatBody">
+        <div class="date-pill">HOJE</div>
+        <div class="privacy-pill">As mensagens são privadas.</div>
+      </div>
+      <footer class="chat-footer">
+        <form class="footer-form" id="chatForm">
+          <input type="text" id="chatInput" placeholder="Mensagem" autocomplete="off" class="input-reset" />
+          <button type="submit" id="sendBtn" class="send-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </form>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    // ==========================================
+    // CONFIGURAÇÃO DE PRODUÇÃO
+    // ==========================================
+    const CONFIG = {
+      API_URL: 'http://localhost:3000', // <-- SUBSTITUA PELA URL DO SEU BACKEND DEPOIS DE HOSPEDAR
+      WHATSAPP_NUMBER: '5511986913505'
+    };
+
+    const chatBody = document.getElementById('chatBody');
+    const chatForm = document.getElementById('chatForm');
+    const chatInput = document.getElementById('chatInput');
+    const getTime = () => new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+    let messageHistory = [
+      {
+        role: "system",
+        content: `Você é a Thais, da Nova Vida TI. Seu objetivo é pré-qualificar leads usando dados (crédito, cobrança e marketing). NUNCA faça mais de uma pergunta por vez.
+        Fluxo: 1. Nome 2. Dor 3. Volume [BOTOES_VOLUME] 4. Nome Empresa 5. CNPJ (Exatamente 14 dígitos).
+        Se qualificado, gere [WHATSAPP_DATA] com os campos Nome, Empresa, CNPJ, Base, Problema.
+        Se desqualificado, use [LEAD_DESQUALIFICADO].`
+      },
+      {
+        role: "assistant",
+        content: "Oi! 👋 Sou a Thais, da Nova Vida TI.<br><br>Trabalho ajudando empresas a melhorar resultados usando dados.<br><br>Antes de começar, nós NÃO somos banco e não oferecemos empréstimos.<br><br>Pra gente começar, qual seu nome?"
+      }
+    ];
+
+    function addMessage(html, type = 'incoming') {
+      const row = document.createElement('div');
+      row.className = `nv-row ${type}`;
+      const bubble = document.createElement('div');
+      bubble.className = 'nv-bubble';
+      bubble.innerHTML = html + `<span class="bubble-time">${getTime()}</span>`;
+      row.appendChild(bubble);
+      chatBody.appendChild(row);
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    function showTyping() {
+      const row = document.createElement('div');
+      row.className = 'nv-row incoming typing-indicator';
+      row.innerHTML = '<div class="nv-bubble"><div class="dot-typing"></div><div class="dot-typing"></div><div class="dot-typing"></div></div>';
+      chatBody.appendChild(row);
+      chatBody.scrollTop = chatBody.scrollHeight;
+      return row;
+    }
+
+    async function renderBotMessages(text) {
+      if (!text) return;
+      const chunks = text.split('<br><br>').filter(t => t.trim() !== '');
+      for (let chunk of chunks) {
+        const t = showTyping();
+        await new Promise(r => setTimeout(r, 1500));
+        t.remove();
+        addMessage(chunk.replace(/\n/g, '<br>'), 'incoming');
+      }
+    }
+
+    async function processAIResponse() {
+      try {
+        const response = await fetch(`${CONFIG.API_URL}/api/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: messageHistory })
+        });
+        const data = await response.json();
+        let botText = data.choices[0].message.content;
+        messageHistory.push({ role: 'assistant', content: botText });
+
+        if (botText.includes('[LEAD_DESQUALIFICADO]')) {
+          window.dataLayer?.push({ 'event': 'chat_lead_desqualificado' });
+        }
+
+        if (botText.includes('[WHATSAPP_DATA]')) {
+          window.dataLayer?.push({ 'event': 'chat_lead_qualificado' });
+          const match = botText.match(/\[WHATSAPP_DATA\]([\s\S]*?)\[\/WHATSAPP_DATA\]/);
+          if (match) {
+            const waLinkParams = match[1].trim();
+            botText = botText.replace(match[0], '');
+            setTimeout(() => {
+              const waLink = `https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(waLinkParams)}`;
+              addMessage(`<p>Vou te direcionar agora para um especialista.</p><a href="${waLink}" target="_blank" class="action-btn" onclick="window.dataLayer.push({'event': 'chat_whatsapp_click'})">Falar com Especialista</a>`, 'incoming');
+            }, 2000);
+          }
+        }
+
+        if (botText.includes('[BOTOES_VOLUME]')) {
+          const buttons = `<div class="chat-choice-container"><button class="chat-choice-btn" onclick="sendChoice('Até 10 mil contatos', this)">Até 10 mil contatos</button><button class="chat-choice-btn" onclick="sendChoice('Entre 50 mil e 100 mil', this)">Entre 50 mil e 100 mil</button><button class="chat-choice-btn" onclick="sendChoice('Acima de 100 mil', this)">Acima de 100 mil</button></div>`;
+          botText = botText.replace('[BOTOES_VOLUME]', buttons);
+        }
+
+        await renderBotMessages(botText.replace('[LEAD_DESQUALIFICADO]', ''));
+      } catch (e) {
+        addMessage("❌ Erro de conexão com o servidor. Verifique se o backend está online.", "incoming");
+      }
+    }
+
+    window.sendChoice = (text, btn) => {
+      btn.closest('.chat-choice-container').remove();
+      chatInput.value = text;
+      chatForm.dispatchEvent(new Event('submit'));
+    };
+
+    chatForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = chatInput.value.trim();
+      if (!text) return;
+      chatInput.value = '';
+      addMessage(text, 'outgoing');
+      messageHistory.push({ role: 'user', content: text });
+      processAIResponse();
+    });
+
+    window.onload = () => renderBotMessages(messageHistory[1].content);
+  </script>
+</body>
+
+</html>
