@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Assistente Thais Souza - Nova Vida TI (Produção)</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    :root { --bg: #09090b; --shell-bg: #0a0a0c; --line: rgba(255, 255, 255, 0.03); --text: #f3f4f6; --muted: #8b929e; --brand: #facc15; --user-bubble: #facc15; --bot-bubble: rgba(250, 204, 21, 0.04); }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; background-color: var(--bg); font-family: 'Inter', sans-serif; color: var(--text); overflow: hidden; }
+    #app-root { display: flex; flex-direction: column; align-items: center; height: 100vh; width: 100vw; }
+    .chat-shell { display: flex; flex-direction: column; height: 100%; width: 100%; max-width: 900px; background: var(--shell-bg); position: relative; overflow: hidden; box-shadow: 0 0 80px rgba(0,0,0,0.5); }
+    .chat-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; border-bottom: 1px solid var(--line); }
+    .profile { display: flex; align-items: center; gap: 14px; }
+    .avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; }
+    .avatar-wrapper { position: relative; }
+    .status-dot { width: 10px; height: 10px; background: var(--brand); border-radius: 50%; position: absolute; bottom: -1px; right: -1px; border: 2px solid var(--shell-bg); }
+    .name { font-size: 15px; font-weight: 600; color: #fff; }
+    .status { color: var(--brand); font-size: 12px; margin-top: 2px; font-weight: 500; }
+    .chat-body { flex: 1; padding: 30px 32px; overflow-y: auto; scroll-behavior: smooth; background-image: radial-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px); background-size: 24px 24px; }
+    .nv-row { display: flex; width: 100%; margin-bottom: 24px; }
+    .incoming { justify-content: flex-start; }
+    .outgoing { justify-content: flex-end; }
+    .nv-bubble { max-width: 80%; padding: 16px 20px; border-radius: 16px; line-height: 1.6; font-size: 15px; position: relative; backdrop-filter: blur(10px); }
+    .incoming .nv-bubble { background: var(--bot-bubble); border: 1px solid rgba(250, 204, 21, 0.1); color: var(--text); border-bottom-left-radius: 4px; }
+    .outgoing .nv-bubble { background: var(--user-bubble); color: #000; font-weight: 500; border-bottom-right-radius: 4px; }
+    .bubble-time { display: block; float: right; margin-top: 8px; margin-left: 12px; font-size: 10px; opacity: 0.5; }
+    .chat-footer { padding: 24px 32px; border-top: 1px solid var(--line); }
+    .footer-form { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.02); border-radius: 30px; padding: 8px 12px 8px 18px; border: 1px solid var(--line); }
+    .input-reset { flex: 1; background: transparent; border: none; color: #fff; font-size: 14px; outline: none; }
+    .send-btn { background: var(--brand); color: #000; border: none; height: 38px; width: 38px; display: grid; place-items: center; cursor: pointer; border-radius: 50%; }
+    .chat-choice-btn { display: block; width: 100%; text-align: left; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 12px 16px; margin-top: 8px; border-radius: 10px; cursor: pointer; font-family: inherit; }
+    .chat-choice-btn:hover { background: rgba(250,204,21,0.15); border-color: var(--brand); }
+    .dot-typing { width: 6px; height: 6px; background: var(--brand); border-radius: 50%; display: inline-block; animation: bounce 1.4s infinite ease-in-out both; }
+    @keyframes bounce { 0%, 80%, 100% { transform: scale(0); opacity: 0.3; } 40% { transform: scale(1); opacity: 1; } }
+    .action-btn { display: block; width: 100%; text-align: center; background: var(--brand); color: #000; text-decoration: none; padding: 14px; border-radius: 10px; font-weight: 700; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <div id="app-root">
+    <main class="chat-shell">
+      <header class="chat-header">
+        <div class="profile">
+          <div class="avatar-wrapper"><img src="https://i.ibb.co/1GrBp8Y4/Captura-de-tela-2026-04-09-152750.png" class="avatar" /><div class="status-dot"></div></div>
+          <div class="name-col"><div class="name">Thais Souza - Nova Vida TI</div><div class="status">online</div></div>
+        </div>
+      </header>
+      <div class="chat-body" id="chatBody"></div>
+      <footer class="chat-footer">
+        <form class="footer-form" id="chatForm">
+          <input type="text" id="chatInput" placeholder="Mensagem" autocomplete="off" class="input-reset" />
+          <button type="submit" class="send-btn">➤</button>
+        </form>
+      </footer>
+    </main>
+  </div>
+  <script>
+    const CONFIG = {
+      API_URL: 'SUBSTITUA_PELA_URL_DO_RAILWAY_AQUI', // <-- ⚠️ Troque isso pelo link do Railway!
+      WHATSAPP_NUMBER: '5511986913505'
+    };
+    const chatBody = document.getElementById('chatBody');
+    const chatForm = document.getElementById('chatForm');
+    const chatInput = document.getElementById('chatInput');
+    const getTime = () => new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    let messageHistory = [{ role: "system", content: "Qualificação Nova Vida TI." }, { role: "assistant", content: "Oi! 👋 Sou a Thais, da Nova Vida TI. Qual seu nome?" }];
+    function addMessage(html, type = 'incoming') {
+      const row = document.createElement('div'); row.className = `nv-row ${type}`;
+      const bubble = document.createElement('div'); bubble.className = 'nv-bubble';
+      bubble.innerHTML = html + `<span class="bubble-time">${getTime()}</span>`;
+      row.appendChild(bubble); chatBody.appendChild(row); chatBody.scrollTop = chatBody.scrollHeight;
+    }
+    async function processAIResponse() {
+      try {
+        const response = await fetch(`${CONFIG.API_URL}/api/chat`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: messageHistory }) });
+        const data = await response.json();
+        let botText = data.choices[0].message.content;
+        messageHistory.push({ role: 'assistant', content: botText });
+        addMessage(botText.replace(/\n/g, '<br>'), 'incoming');
+      } catch (e) { addMessage("❌ Erro de conexão com o servidor.", "incoming"); }
+    }
+    chatForm.addEventListener('submit', (e) => {
+      e.preventDefault(); const text = chatInput.value.trim(); if (!text) return;
+      chatInput.value = ''; addMessage(text, 'outgoing');
+      messageHistory.push({ role: 'user', content: text }); processAIResponse();
+    });
+    window.onload = () => addMessage(messageHistory[1].content, 'incoming');
+  </script>
+</body>
+</html>
