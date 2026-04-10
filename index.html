@@ -597,7 +597,7 @@ Problema: {{dor}}
           addMessage(`<p>Vou te conectar agora.</p><a href="${waLink}" target="_blank" class="action-btn" onclick="window.dataLayer.push({'event': 'chat_whatsapp_click'})">Falar com Especialista</a>`, 'incoming');
         }
       } catch (e) {
-        addMessage("❌ Erro de conexão com o servidor. Verifique se o backend está online.", "incoming");
+        addMessage("❌ Sua internet está instável, por favor, verifique sua conexão e tente novamente.", "incoming");
       }
     }
 
