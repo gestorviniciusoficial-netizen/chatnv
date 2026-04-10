@@ -355,7 +355,41 @@
       gap: 12px;
       margin-top: 15px;
       font-weight: 700;
-      box-shadow: 0 10px 20px rgba(37, 211, 102, 0.2);
+    }
+
+    /* Estilo Responsivo Mobile (WhatsApp Style) */
+    @media (max-width: 768px) {
+      #app-root {
+        padding: 0;
+        /* Remove a margem externa no mobile */
+      }
+
+      .chat-shell {
+        height: 100vh;
+        /* Ocupa a altura total do navegador */
+        max-width: 100%;
+        border-radius: 0;
+        /* Bordas retas como um app nativo */
+        border: none;
+      }
+
+      .chat-header {
+        padding: 15px 20px;
+      }
+
+      .chat-body {
+        padding: 15px 20px;
+      }
+
+      .chat-footer {
+        padding: 15px 20px 25px 20px;
+        /* Ajuste para navegação mobile */
+      }
+
+      .nv-bubble {
+        max-width: 85%;
+        /* Um pouco mais de espaço para o texto no celular */
+      }
     }
   </style>
 </head>
