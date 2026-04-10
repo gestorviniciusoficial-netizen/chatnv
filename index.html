@@ -213,6 +213,20 @@
       opacity: 0.6;
     }
 
+    .tick-icon {
+      width: 14px;
+      height: 14px;
+      display: inline-block;
+    }
+
+    .tick-blue {
+      color: #34b7f1;
+    }
+
+    .tick-grey {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
     /* Typing Indicator Dark */
     .typing-indicator .nv-bubble {
       background: var(--bot-bubble);
@@ -485,7 +499,7 @@
 🔎 VALIDAÇÃO: Aceite com ou sem pontos/traços/barras. O requisito é ter exatamente 14 dígitos numéricos no total. Se inválido: "CNPJ inválido ou incompleto, pode conferir pra mim?"
 
 ✅ SUCESSO: "Perfeito, {{nome}}, já identifiquei sua empresa 👍\n\nVou te conectar com nosso time agora. Quando abrir a conversa, já vai aparecer uma mensagem automática com alguns dados seus, isso ajuda nosso time a entender seu cenário mais rápido, então pode enviar ela direto, ok?\n\nA partir daí eles continuam com você 🙂"
-(SILENCIOSO - APENAS GERE O BLOCO ABAIXO):
+Sempre finalize a conversa gerando OBRIGATORIAMENTE o bloco abaixo, sem nenhum texto antes dele:
 [WHATSAPP_DATA]
 Nome: {{nome}}
 Empresa: {{empresa}}
@@ -505,7 +519,12 @@ Problema: {{dor}}
       row.className = `nv-row ${type}`;
       const bubble = document.createElement('div');
       bubble.className = 'nv-bubble';
-      bubble.innerHTML = html + `<span class="bubble-time">${getTime()}</span>`;
+
+      const tickSvg = type === 'outgoing'
+        ? '<svg class="tick-icon tick-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12l5 5L22 4"/><path d="M7 12l5 5L15 14"/></svg>'
+        : '<svg class="tick-icon tick-grey" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12l5 5L22 4"/><path d="M7 12l5 5L15 14"/></svg>';
+
+      bubble.innerHTML = html + `<div class="bubble-time">${getTime()} ${tickSvg}</div>`;
       row.appendChild(bubble);
       chatBody.appendChild(row);
       chatBody.scrollTop = chatBody.scrollHeight;
