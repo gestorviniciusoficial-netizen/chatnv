@@ -484,7 +484,7 @@
 6. CNPJ: "Perfeito. Pra te direcionar com mais precisão, me informa o CNPJ da empresa?"
 🔎 VALIDAÇÃO: Aceite com ou sem pontos/traços/barras. O requisito é ter exatamente 14 dígitos numéricos no total. Se inválido: "CNPJ inválido ou incompleto, pode conferir pra mim?"
 
-✅ SUCESSO: "Perfeito, {{nome}}, já identifiquei sua empresa 👍 Vou te conectar com nosso time agora. Quando abrir a conversa, já vai aparecer uma mensagem automática com alguns dados seus, isso ajuda nosso time a entender seu cenário mais rápido, então pode enviar ela direto, ok? A partir daí eles continuam com você 🙂"
+✅ SUCESSO: "Perfeito, {{nome}}, já identifiquei sua empresa 👍\n\nVou te conectar com nosso time agora. Quando abrir a conversa, já vai aparecer uma mensagem automática com alguns dados seus, isso ajuda nosso time a entender seu cenário mais rápido, então pode enviar ela direto, ok?\n\nA partir daí eles continuam com você 🙂"
 📩 BLOCO OBRIGATÓRIO (WHATSAPP):
 [WHATSAPP_DATA]
 Nome: {{nome}}
@@ -545,8 +545,11 @@ Problema: {{dor}}
         let botText = data.choices[0].message.content;
         messageHistory.push({ role: 'assistant', content: botText });
 
+        let waLink = null;
+
         if (botText.includes('[LEAD_DESQUALIFICADO]')) {
           window.dataLayer?.push({ 'event': 'chat_lead_desqualificado' });
+          botText = botText.replace('[LEAD_DESQUALIFICADO]', '');
         }
 
         if (botText.includes('[WHATSAPP_DATA]')) {
@@ -554,11 +557,8 @@ Problema: {{dor}}
           const match = botText.match(/\[WHATSAPP_DATA\]([\s\S]*?)\[\/WHATSAPP_DATA\]/);
           if (match) {
             const waLinkParams = match[1].trim();
+            waLink = `https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(waLinkParams)}`;
             botText = botText.replace(match[0], '');
-            setTimeout(() => {
-              const waLink = `https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(waLinkParams)}`;
-              addMessage(`<p>Vou te direcionar agora para um especialista.</p><a href="${waLink}" target="_blank" class="action-btn" onclick="window.dataLayer.push({'event': 'chat_whatsapp_click'})">Falar com Especialista</a>`, 'incoming');
-            }, 2000);
           }
         }
 
@@ -567,7 +567,16 @@ Problema: {{dor}}
           botText = botText.replace('[BOTOES_VOLUME]', buttons);
         }
 
-        await renderBotMessages(botText.replace('[LEAD_DESQUALIFICADO]', ''));
+        // Renderiza as mensagens de texto primeiro
+        await renderBotMessages(botText);
+
+        // Somente após o texto, exibe o botão se o lead for qualificado
+        if (waLink) {
+          const t = showTyping();
+          await new Promise(r => setTimeout(r, 1500));
+          t.remove();
+          addMessage(`<p>Vou te conectar agora.</p><a href="${waLink}" target="_blank" class="action-btn" onclick="window.dataLayer.push({'event': 'chat_whatsapp_click'})">Falar com Especialista</a>`, 'incoming');
+        }
       } catch (e) {
         addMessage("❌ Erro de conexão com o servidor. Verifique se o backend está online.", "incoming");
       }
