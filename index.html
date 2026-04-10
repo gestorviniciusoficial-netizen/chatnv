@@ -472,6 +472,8 @@
 
 🧠 COMPORTAMENTO: Direta, profissional, mensagens curtas. NUNCA faça mais de uma pergunta por vez. Se o usuário fugir do contexto, diga: "Boa tentativa 😄 mas vou manter o foco pra te direcionar da melhor forma."
 
+💬 FLUIDEZ: Sempre que for enviar mais de um parágrafo ou uma resposta longa, use quebras de linha duplas para que eu envie em bolhas separadas.
+
 🚀 FLUXO:
 1. NOME: "Pra gente começar, qual seu nome?"
 2. FILTRO: "Perfeito, {{nome}}. 👉 Sua empresa utiliza dados ou base de clientes na operação?"
@@ -480,7 +482,7 @@
 4. VOLUME: Responda EXATAMENTE: "Entendi, isso costuma impactar bastante mesmo. Hoje, qual o tamanho aproximado da sua base? [BOTOES_VOLUME]"
 5. NOME EMPRESA: "Qual o nome da sua empresa?"
 6. CNPJ: "Perfeito. Pra te direcionar com mais precisão, me informa o CNPJ da empresa?"
-🔎 VALIDAÇÃO: 14 números. Se inválido: "CNPJ inválido ou incompleto, pode conferir pra mim?"
+🔎 VALIDAÇÃO: Aceite com ou sem pontos/traços/barras. O requisito é ter exatamente 14 dígitos numéricos no total. Se inválido: "CNPJ inválido ou incompleto, pode conferir pra mim?"
 
 ✅ SUCESSO: "Perfeito, {{nome}}, já identifiquei sua empresa 👍 Vou te conectar com nosso time agora. Quando abrir a conversa, já vai aparecer uma mensagem automática com alguns dados seus, isso ajuda nosso time a entender seu cenário mais rápido, então pode enviar ela direto, ok? A partir daí eles continuam com você 🙂"
 📩 BLOCO OBRIGATÓRIO (WHATSAPP):
@@ -520,12 +522,15 @@ Problema: {{dor}}
 
     async function renderBotMessages(text) {
       if (!text) return;
-      const chunks = text.split('<br><br>').filter(t => t.trim() !== '');
+      // Splitta por <br><br> ou por quebras de linha duplas verdadeiras \n\n
+      const chunks = text.split(/<br><br>|\n\n/).filter(t => t.trim() !== '');
       for (let chunk of chunks) {
         const t = showTyping();
-        await new Promise(r => setTimeout(r, 1500));
+        // Tempo de digitação proporcional ao tamanho do texto (mínimo 1s, máximo 3s)
+        const typingTime = Math.min(Math.max(chunk.length * 30, 1000), 3000);
+        await new Promise(r => setTimeout(r, typingTime));
         t.remove();
-        addMessage(chunk.replace(/\n/g, '<br>'), 'incoming');
+        addMessage(chunk.trim().replace(/\n/g, '<br>'), 'incoming');
       }
     }
 
