@@ -6,173 +6,268 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Assistente Thais Souza - Nova Vida TI (Produção)</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
     :root {
-      --bg: #09090b;
-      --shell-bg: #0a0a0c;
-      --line: rgba(255, 255, 255, 0.03);
-      --text: #f3f4f6;
-      --muted: #8b929e;
-      --brand: #facc15;
+      --bg-dark: #050505;
+      --accent: #facc15;
+      --accent-glow: rgba(250, 204, 21, 0.4);
+      --glass: rgba(15, 15, 18, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --text-main: #ffffff;
+      --text-dim: #94a3b8;
+      --bot-bubble: rgba(255, 255, 255, 0.04);
       --user-bubble: #facc15;
-      --bot-bubble: rgba(250, 204, 21, 0.04);
     }
 
     * {
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    html,
-    body {
+    body,
+    html {
       margin: 0;
       padding: 0;
       width: 100%;
       height: 100%;
-      background-color: var(--bg);
-      font-family: 'Inter', sans-serif;
-      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-dark);
+      /* Padrão de pontos modernos */
+      background-image:
+        radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.035) 1px, transparent 0);
+      background-size: 32px 32px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       overflow: hidden;
+    }
+
+    /* Overlay de gradiente para dar profundidade */
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at top right, rgba(250, 204, 21, 0.05), transparent 40%),
+        radial-gradient(circle at bottom left, rgba(250, 204, 21, 0.02), transparent 40%);
+      pointer-events: none;
     }
 
     #app-root {
+      width: 100%;
+      height: 100%;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
       align-items: center;
-      height: 100vh;
-      width: 100vw;
+      padding: 20px;
     }
 
     .chat-shell {
+      width: 100%;
+      max-width: 850px;
+      height: 90vh;
+      background: var(--glass);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid var(--glass-border);
+      border-radius: 40px;
       display: flex;
       flex-direction: column;
-      height: 100%;
-      width: 100%;
-      max-width: 900px;
-      background: var(--shell-bg);
-      position: relative;
       overflow: hidden;
-      box-shadow: 0 0 80px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+      position: relative;
     }
 
+    /* Header Estilo Telegram Sleek */
     .chat-header {
+      padding: 20px 30px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 32px;
-      border-bottom: 1px solid var(--line);
+      border-bottom: 1px solid var(--glass-border);
+      background: rgba(0, 0, 0, 0.2);
     }
 
-    .profile {
+    .profile-info {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 15px;
     }
 
-    .avatar {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-
-    .avatar-wrapper {
+    .avatar-container {
       position: relative;
+      width: 48px;
+      height: 48px;
     }
 
-    .status-dot {
-      width: 10px;
-      height: 10px;
-      background: var(--brand);
-      border-radius: 50%;
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      border-radius: 16px;
+      object-fit: cover;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .online-indicator {
       position: absolute;
-      bottom: -1px;
-      right: -1px;
-      border: 2px solid var(--shell-bg);
+      bottom: -2px;
+      right: -2px;
+      width: 12px;
+      height: 12px;
+      background: #22c55e;
+      border-radius: 50%;
+      border: 2px solid #111;
     }
 
-    .name {
-      font-size: 15px;
-      font-weight: 600;
+    .user-details .user-name {
+      font-weight: 700;
+      font-size: 16px;
       color: #fff;
     }
 
-    .status {
-      color: var(--brand);
+    .user-details .user-status {
       font-size: 12px;
-      margin-top: 2px;
+      color: #22c55e;
       font-weight: 500;
     }
 
+    .header-actions {
+      display: flex;
+      gap: 15px;
+      color: var(--text-dim);
+    }
+
+    .header-actions svg {
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .header-actions svg:hover {
+      color: var(--accent);
+    }
+
+    /* Body de Mensagens */
     .chat-body {
       flex: 1;
-      padding: 30px 32px;
+      padding: 25px 30px;
       overflow-y: auto;
-      scroll-behavior: smooth;
-      background-image: radial-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-      background-size: 24px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      scrollbar-width: none;
+    }
+
+    .chat-body::-webkit-scrollbar {
+      display: none;
     }
 
     .nv-row {
       display: flex;
       width: 100%;
-      margin-bottom: 24px;
+      margin-bottom: 5px;
     }
 
-    .incoming {
+    .nv-row.incoming {
       justify-content: flex-start;
     }
 
-    .outgoing {
+    .nv-row.outgoing {
       justify-content: flex-end;
     }
 
     .nv-bubble {
-      max-width: 80%;
-      padding: 16px 20px;
-      border-radius: 16px;
-      line-height: 1.6;
+      max-width: 75%;
+      padding: 14px 18px;
       font-size: 15px;
+      line-height: 1.5;
       position: relative;
+      transition: transform 0.2s;
       backdrop-filter: blur(10px);
     }
 
     .incoming .nv-bubble {
       background: var(--bot-bubble);
-      border: 1px solid rgba(250, 204, 21, 0.1);
-      color: var(--text);
-      border-bottom-left-radius: 4px;
+      color: #fff;
+      border-radius: 20px 20px 20px 5px;
+      border: 1px solid rgba(255, 255, 255, 0.03);
     }
 
     .outgoing .nv-bubble {
-      background: var(--user-bubble);
+      background: var(--accent);
       color: #000;
-      font-weight: 500;
-      border-bottom-right-radius: 4px;
+      border-radius: 20px 20px 5px 20px;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(250, 204, 21, 0.2);
     }
 
     .bubble-time {
-      display: block;
-      float: right;
-      margin-top: 8px;
-      margin-left: 12px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 4px;
       font-size: 10px;
-      opacity: 0.5;
+      margin-top: 5px;
+      opacity: 0.6;
     }
 
+    /* Typing Indicator Dark */
+    .typing-indicator .nv-bubble {
+      background: var(--bot-bubble);
+      padding: 12px 20px;
+      border-radius: 20px;
+      display: flex;
+      gap: 5px;
+      width: fit-content;
+    }
+
+    .dot-typing {
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      opacity: 0.4;
+      animation: dotPulse 1.5s infinite;
+    }
+
+    .dot-typing:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .dot-typing:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes dotPulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 0.4;
+      }
+
+      50% {
+        transform: scale(1.3);
+        opacity: 1;
+      }
+    }
+
+    /* Footer Estilo iOS/Telegram */
     .chat-footer {
-      padding: 24px 32px;
-      border-top: 1px solid var(--line);
+      padding: 20px 30px 35px 30px;
+      background: transparent;
     }
 
     .footer-form {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
       display: flex;
       align-items: center;
+      padding: 8px 15px;
       gap: 12px;
-      background: rgba(255, 255, 255, 0.02);
-      border-radius: 30px;
-      padding: 8px 12px 8px 18px;
-      border: 1px solid var(--line);
     }
 
     .input-reset {
@@ -180,76 +275,87 @@
       background: transparent;
       border: none;
       color: #fff;
-      font-size: 14px;
+      font-size: 15px;
+      padding: 10px 0;
       outline: none;
     }
 
+    .icon-btn {
+      color: var(--text-dim);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      transition: 0.2s;
+    }
+
+    .icon-btn:hover {
+      color: var(--accent);
+    }
+
     .send-btn {
-      background: var(--brand);
-      color: #000;
+      width: 42px;
+      height: 42px;
+      background: var(--accent);
       border: none;
-      height: 38px;
-      width: 38px;
+      border-radius: 50%;
       display: grid;
       place-items: center;
       cursor: pointer;
-      border-radius: 50%;
+      color: #000;
+      box-shadow: 0 4px 12px rgba(250, 204, 21, 0.3);
+      transition: transform 0.2s;
+    }
+
+    .send-btn:hover {
+      transform: scale(1.05);
+    }
+
+    /* Button de Seleção Multiple */
+    .chat-choice-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
     }
 
     .chat-choice-btn {
-      display: block;
-      width: 100%;
-      text-align: left;
       background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--glass-border);
       color: #fff;
       padding: 12px 16px;
-      margin-top: 8px;
-      border-radius: 10px;
+      border-radius: 14px;
       cursor: pointer;
       font-family: inherit;
+      transition: 0.2s;
+      text-align: left;
     }
 
     .chat-choice-btn:hover {
-      background: rgba(250, 204, 21, 0.15);
-      border-color: var(--brand);
+      background: rgba(250, 204, 21, 0.1);
+      border-color: var(--accent);
     }
 
-    .dot-typing {
-      width: 6px;
-      height: 6px;
-      background: var(--brand);
-      border-radius: 50%;
-      display: inline-block;
-      animation: bounce 1.4s infinite ease-in-out both;
-    }
-
-    @keyframes bounce {
-
-      0%,
-      80%,
-      100% {
-        transform: scale(0);
-        opacity: 0.3;
-      }
-
-      40% {
-        transform: scale(1);
-        opacity: 1;
-      }
+    .chat-choice-selected {
+      background: var(--accent) !important;
+      color: #000 !important;
+      font-weight: 600;
+      padding: 12px 16px;
+      border-radius: 14px;
     }
 
     .action-btn {
-      display: block;
-      width: 100%;
-      text-align: center;
-      background: var(--brand);
-      color: #000;
+      background: #25d366;
+      color: #fff;
+      padding: 15px;
+      border-radius: 18px;
       text-decoration: none;
-      padding: 14px;
-      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 15px;
       font-weight: 700;
-      margin-top: 16px;
+      box-shadow: 0 10px 20px rgba(37, 211, 102, 0.2);
     }
   </style>
 </head>
@@ -258,22 +364,58 @@
   <div id="app-root">
     <main class="chat-shell">
       <header class="chat-header">
-        <div class="profile">
-          <div class="avatar-wrapper"><img src="https://i.ibb.co/1GrBp8Y4/Captura-de-tela-2026-04-09-152750.png"
-              class="avatar" />
-            <div class="status-dot"></div>
+        <div class="profile-info">
+          <div class="avatar-container">
+            <img src="https://i.ibb.co/1GrBp8Y4/Captura-de-tela-2026-04-09-152750.png" class="avatar-img" />
+            <div class="online-indicator"></div>
           </div>
-          <div class="name-col">
-            <div class="name">Thais Souza - Nova Vida TI</div>
-            <div class="status">online</div>
+          <div class="user-details">
+            <div class="user-name">Thais Souza - Nova Vida TI</div>
+            <div class="user-status">online</div>
           </div>
         </div>
+        <div class="header-actions">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="1" />
+            <circle cx="12" cy="5" r="1" />
+            <circle cx="12" cy="19" r="1" />
+          </svg>
+        </div>
       </header>
+
       <div class="chat-body" id="chatBody"></div>
+
       <footer class="chat-footer">
-        <form class="footer-form" id="chatForm">
+        <form id="chatForm" class="footer-form">
+          <div class="icon-btn">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+              <line x1="9" y1="9" x2="9.01" y2="9" />
+              <line x1="15" y1="9" x2="15.01" y2="9" />
+            </svg>
+          </div>
+          <div class="icon-btn">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path
+                d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.51a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+            </svg>
+          </div>
           <input type="text" id="chatInput" placeholder="Mensagem" autocomplete="off" class="input-reset" />
-          <button type="submit" class="send-btn">➤</button>
+          <button type="submit" class="send-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="m5 12 14-7-7 14-2-7-5-2Z" />
+            </svg>
+          </button>
         </form>
       </footer>
     </main>
