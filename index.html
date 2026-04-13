@@ -632,10 +632,10 @@ Problema: {{dor}}
       const lastAssistant = [...messageHistory].reverse().find(m => m.role === 'assistant');
       if (lastAssistant && /cnpj/i.test(lastAssistant.content)) {
         cnpjStage = true;
-        chatInput.setAttribute('type', 'tel');
+        chatInput.setAttribute('type', 'text');
         chatInput.setAttribute('inputmode', 'numeric');
-        chatInput.setAttribute('maxlength', '14');
-        chatInput.placeholder = 'Digite os 14 números do CNPJ';
+        chatInput.setAttribute('maxlength', '18');
+        chatInput.placeholder = 'Ex: 59.285.411/0001-13 ou só os números';
       } else {
         cnpjStage = false;
         chatInput.setAttribute('type', 'text');
@@ -645,35 +645,39 @@ Problema: {{dor}}
       }
     }
 
+    // Permite dígitos, ponto, barra e traço — bloqueia todo o resto
     chatInput.addEventListener('input', () => {
       if (cnpjStage) {
-        chatInput.value = chatInput.value.replace(/\D/g, '').slice(0, 14);
+        chatInput.value = chatInput.value.replace(/[^0-9./\-]/g, '').slice(0, 18);
       }
     });
 
     chatInput.addEventListener('keypress', (e) => {
-      if (cnpjStage && !/[0-9]/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
+      if (cnpjStage && !/[0-9./\-]/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
         e.preventDefault();
       }
     });
 
     chatForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      let text = chatInput.value.trim();
-      if (!text) return;
+      const rawText = chatInput.value.trim();
+      if (!rawText) return;
 
+      let textToSend = rawText;
       if (cnpjStage) {
-        text = text.replace(/\D/g, '').slice(0, 14);
-        if (text.length < 14) {
-          chatInput.value = text;
-          chatInput.placeholder = 'CNPJ incompleto — precisa de 14 números';
+        // Remove tudo que não for dígito para contar e enviar ao modelo
+        const digits = rawText.replace(/\D/g, '');
+        if (digits.length < 14) {
+          chatInput.placeholder = 'CNPJ incompleto — precisa ter 14 dígitos';
           return;
         }
+        // Envia só os dígitos para o modelo (mais limpo), mostra o que o usuário digitou na bolha
+        textToSend = digits;
       }
 
       chatInput.value = '';
-      addMessage(text, 'outgoing');
-      messageHistory.push({ role: 'user', content: text });
+      addMessage(rawText, 'outgoing');
+      messageHistory.push({ role: 'user', content: textToSend });
       processAIResponse();
     });
 
