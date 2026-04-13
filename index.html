@@ -510,7 +510,7 @@
 4. VOLUME: Responda EXATAMENTE: "Entendi, isso costuma impactar bastante mesmo. Hoje, qual o tamanho aproximado da sua base? [BOTOES_VOLUME]"
 5. NOME EMPRESA: "Qual o nome da sua empresa?"
 6. CNPJ: "Perfeito. Pra te direcionar com mais precisão, me informa o CNPJ da empresa?"
-🔎 VALIDAÇÃO: Aceite com ou sem pontos/traços/barras. O requisito é ter exatamente 14 dígitos numéricos no total. Se inválido: "CNPJ inválido ou incompleto, pode conferir pra mim?"
+🔎 VALIDAÇÃO: O frontend já garante que o usuário só pode digitar exatamente 14 dígitos numéricos. SEMPRE aceite o CNPJ recebido como válido e prossiga imediatamente para o próximo passo. NUNCA rejeite o CNPJ nesta etapa.
 
 ✅ SUCESSO: "Perfeito, {{nome}}, já identifiquei sua empresa 👍\n\nVou te conectar com nosso time agora. Quando abrir a conversa, já vai aparecer uma mensagem automática com alguns dados seus, isso ajuda nosso time a entender seu cenário mais rápido, então pode enviar ela direto, ok?\n\nA partir daí eles continuam com você 🙂"
 Sempre finalize a conversa gerando OBRIGATORIAMENTE o bloco abaixo, sem nenhum texto antes dele:
@@ -610,6 +610,9 @@ Problema: {{dor}}
           t.remove();
           addMessage(`<p>Vou te conectar agora.</p><a href="${waLink}" target="_blank" class="action-btn" onclick="window.dataLayer.push({'event': 'chat_whatsapp_click'})">Falar com Especialista</a>`, 'incoming');
         }
+
+        // Ativa/desativa restrição de CNPJ conforme a etapa atual
+        checkCnpjStage();
       } catch (e) {
         addMessage("❌ Sua internet está instável, por favor, verifique sua conexão e tente novamente.", "incoming");
       }
@@ -623,10 +626,51 @@ Problema: {{dor}}
       processAIResponse();
     }
 
+    let cnpjStage = false;
+
+    function checkCnpjStage() {
+      const lastAssistant = [...messageHistory].reverse().find(m => m.role === 'assistant');
+      if (lastAssistant && /cnpj/i.test(lastAssistant.content)) {
+        cnpjStage = true;
+        chatInput.setAttribute('type', 'tel');
+        chatInput.setAttribute('inputmode', 'numeric');
+        chatInput.setAttribute('maxlength', '14');
+        chatInput.placeholder = 'Digite os 14 números do CNPJ';
+      } else {
+        cnpjStage = false;
+        chatInput.setAttribute('type', 'text');
+        chatInput.removeAttribute('inputmode');
+        chatInput.removeAttribute('maxlength');
+        chatInput.placeholder = 'Mensagem';
+      }
+    }
+
+    chatInput.addEventListener('input', () => {
+      if (cnpjStage) {
+        chatInput.value = chatInput.value.replace(/\D/g, '').slice(0, 14);
+      }
+    });
+
+    chatInput.addEventListener('keypress', (e) => {
+      if (cnpjStage && !/[0-9]/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
+        e.preventDefault();
+      }
+    });
+
     chatForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      const text = chatInput.value.trim();
+      let text = chatInput.value.trim();
       if (!text) return;
+
+      if (cnpjStage) {
+        text = text.replace(/\D/g, '').slice(0, 14);
+        if (text.length < 14) {
+          chatInput.value = text;
+          chatInput.placeholder = 'CNPJ incompleto — precisa de 14 números';
+          return;
+        }
+      }
+
       chatInput.value = '';
       addMessage(text, 'outgoing');
       messageHistory.push({ role: 'user', content: text });
